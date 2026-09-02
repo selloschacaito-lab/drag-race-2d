@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pixel Drag Mobile Edition</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🏁 PIXEL DRAG (MOBILE & PC)</h1>
+            <div class="car-selector">
+                <button id="btnSelectCivic">🚗 Civic 1.6 FWD</button>
+                <button id="btnSelectMustang">🏎️ Mustang V8 RWD</button>
+                <button id="btnRestart">🔄 Reiniciar</button>
+            </div>
+        </div>
+
+        <div class="canvas-wrapper">
+            <div id="raceBanner" class="race-banner">¡PREPÁRATE EN LA LÍNEA!</div>
+            <canvas id="gameCanvas" width="928" height="300"></canvas>
+        </div>
+
+        <div class="dashboard">
+            <div class="panel">
+                <span class="label">Auto</span>
+                <span id="carNameDisplay" style="color: #38bdf8; font-weight: bold; font-size: 13px;">Kanso Civic EX 1.6</span>
+                
+                <span class="label" style="margin-top: 4px;">Velocidad</span>
+                <div><span id="speedDisplay" class="value-large">0</span> <span style="color:#64748b; font-size:11px;">KM/H</span></div>
+
+                <span class="label" style="margin-top: 4px;">RPM</span>
+                <div><span id="rpmDisplay" class="value-large" style="color:#fbbf24;">850</span></div>
+            </div>
+
+            <div class="gear-box">
+                <div class="shift-light" id="shiftLight"></div>
+                <span class="label">MARCHA</span>
+                <span id="gearDisplay" style="font-size: 42px; font-weight: 900; color: #94a3b8;">N</span>
+            </div>
+
+            <div class="panel">
+                <span class="label">Distancia</span>
+                <div id="distDisplay" style="font-weight: bold; font-size: 13px;">0.0 m / 402 m</div>
+
+                <span class="label" style="margin-top: 4px;">Tiempo</span>
+                <div id="timerDisplay" style="font-weight: bold; font-size: 16px; color:#38bdf8;">0.000 s</div>
+
+                <span class="label" style="margin-top: 4px;">Grip / Temp</span>
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span id="tempDisplay" style="color:#f59e0b; font-weight:bold; font-size: 12px;">40 °C</span>
+                    <span id="gripDisplay" style="color:#4ade80; font-weight:bold; font-size: 11px;">TRACCIÓN OK</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones Táctiles para Pantallas de Teléfono -->
+        <div class="mobile-touch-controls">
+            <div class="touch-cluster-left">
+                <button id="btnTouchClutch" class="touch-btn btn-clutch">
+                    <span>CLUTCH</span>
+                    <small style="font-size: 9px; opacity: 0.8;">(EMBRAGUE)</small>
+                </button>
+                <button id="btnTouchShiftDown" class="touch-btn btn-shift-down">
+                    <span>- MARCHA</span>
+                    <small style="font-size: 9px; opacity: 0.8;">(BAJAR)</small>
+                </button>
+            </div>
+            <div class="touch-cluster-right">
+                <button id="btnTouchShiftUp" class="touch-btn btn-shift-up">
+                    <span>+ MARCHA</span>
+                    <small style="font-size: 9px; opacity: 0.8;">(SUBIR)</small>
+                </button>
+                <button id="btnTouchGas" class="touch-btn btn-gas">
+                    <span>GAS</span>
+                    <small style="font-size: 9px; opacity: 0.8;">(ACELERAR)</small>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="src/game.js"></script>
+</body>
+</html>

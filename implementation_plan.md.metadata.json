@@ -1,0 +1,6 @@
+{
+  "summary": "Plan de implementación para crear un prototipo jugable interactivo en Web / HTML5 Canvas del juego de carreras 2D estilo Pixel Car Racer. Implementa simulación física real (Civic vs Mustang), transmisión manual con clutch, sprites pixel art procedurales modulares y modo Drag de 1/4 de milla.",
+  "updatedAt": "2026-09-02T22:26:55.820504200Z",
+  "requestFeedback": true,
+  "userFacing": true
+}
