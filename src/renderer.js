@@ -1,9 +1,11 @@
 ﻿// Cargador de Sprites Pixel Art Oficiales
 export const CarSprites = {
     civic: new Image(),
+    civicBody: new Image(),
     civicWheelF: new Image(),
     civicWheelR: new Image(),
     mustang: new Image(),
+    mustangBody: new Image(),
     mustangWheelF: new Image(),
     mustangWheelR: new Image(),
     loaded: 0
@@ -15,6 +17,10 @@ function onImgLoad() {
 
 CarSprites.civic.src = "assets/civic_ek9.png";
 CarSprites.civic.onload = onImgLoad;
+
+// We need to use the full image and erase the wheels, OR just draw the full image and draw the spinning wheels OVER it.
+// The problem with drawing OVER it is that the static wheels in the background image are still visible if the spinning wheel isn't perfectly opaque or if the cut is slightly misaligned.
+// Let's use the full image for the body, but the spinning wheel must exactly cover the static wheel.
 
 CarSprites.civicWheelF.src = "assets/civic_wheel_front.png";
 CarSprites.civicWheelF.onload = onImgLoad;
@@ -54,11 +60,10 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
     // 1. Dibujar el auto original completo
     ctx.drawImage(carImg, drawX, drawY, drawWidth, drawHeight);
 
-    // 2. Coordenadas y tamaños exactos de las ruedas recortadas
+    // 2. Coordenadas exactas
     const scale = drawWidth / 1024;
     
-    // Civic: Delantera X=224, Y=238. Trasera X=796, Y=240. Radio=68px
-    // Mustang: Delantera X=210, Y=242. Trasera X=750, Y=238. Radio=85px
+    // Medidas reajustadas:
     const fX = isMustang ? 210 : 224;
     const fY = isMustang ? 242 : 238;
     const rX = isMustang ? 750 : 796;
@@ -66,13 +71,16 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
     const rRadius = isMustang ? 85 : 68;
 
     const wheelDiameter = (rRadius * 2) * scale;
-    const rotationAngle = -(car.x / 0.32); // Rotación según avance
+    // IMPORTANTE: Al invertir el contexto con scale(-1, 1), el ángulo de rotación también se invierte visualmente.
+    // Además, el coche avanza hacia la derecha (x positiva), lo que en un contexto normal significa rotación horaria.
+    // Al estar en un contexto invertido en X, para que visualmente gire en sentido horario, debemos darle un ángulo negativo.
+    // Velocidad angular = v / r.
+    const rotationAngle = (car.x / 0.32);
 
-    // Dibujar la propia rueda original recortada rotando sobre su centro exacto
     drawRotatingRealWheel(ctx, drawX + fX * scale, drawY + fY * scale, wheelDiameter, wheelFImg, rotationAngle);
     drawRotatingRealWheel(ctx, drawX + rX * scale, drawY + rY * scale, wheelDiameter, wheelRImg, rotationAngle);
 
-    // Escape y Llamaradas de backfire en la cola
+    // Escape
     const exhaustX = isMustang ? drawWidth * 0.48 : drawWidth * 0.46;
     const exhaustY = 4;
 
@@ -86,6 +94,12 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
 function drawRotatingRealWheel(ctx, cx, cy, diameter, wheelImg, angle) {
     ctx.save();
     ctx.translate(cx, cy);
+    // Para ocultar la llanta estática de fondo perfectamente, dibujamos un círculo negro de fondo
+    ctx.fillStyle = "#111111";
+    ctx.beginPath();
+    ctx.arc(0, 0, diameter / 2, 0, Math.PI * 2);
+    ctx.fill();
+    
     ctx.rotate(angle);
     ctx.drawImage(wheelImg, -diameter / 2, -diameter / 2, diameter, diameter);
     ctx.restore();
