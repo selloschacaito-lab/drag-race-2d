@@ -1,55 +1,76 @@
 ﻿// Cargador de Sprites Pixel Art Oficiales
 export const CarSprites = {
     civic: new Image(),
+    civicWheelF: new Image(),
+    civicWheelR: new Image(),
     mustang: new Image(),
-    loaded: { civic: false, mustang: false }
+    mustangWheelF: new Image(),
+    mustangWheelR: new Image(),
+    loaded: 0
 };
 
+function onImgLoad() {
+    CarSprites.loaded++;
+}
+
 CarSprites.civic.src = "assets/civic_ek9.png";
-CarSprites.civic.onload = () => { CarSprites.loaded.civic = true; };
+CarSprites.civic.onload = onImgLoad;
+
+CarSprites.civicWheelF.src = "assets/civic_wheel_front.png";
+CarSprites.civicWheelF.onload = onImgLoad;
+
+CarSprites.civicWheelR.src = "assets/civic_wheel_rear.png";
+CarSprites.civicWheelR.onload = onImgLoad;
 
 CarSprites.mustang.src = "assets/mustang_fastback.png";
-CarSprites.mustang.onload = () => { CarSprites.loaded.mustang = true; };
+CarSprites.mustang.onload = onImgLoad;
+
+CarSprites.mustangWheelF.src = "assets/mustang_wheel_front.png";
+CarSprites.mustangWheelF.onload = onImgLoad;
+
+CarSprites.mustangWheelR.src = "assets/mustang_wheel_rear.png";
+CarSprites.mustangWheelR.onload = onImgLoad;
 
 export function drawPixelCar(ctx, car, screenX, screenY) {
     ctx.save();
     ctx.translate(Math.round(screenX), Math.round(screenY));
 
     const isMustang = car.config.id === "mustang";
-    const img = isMustang ? CarSprites.mustang : CarSprites.civic;
-    const isLoaded = isMustang ? CarSprites.loaded.mustang : CarSprites.loaded.civic;
+    const carImg = isMustang ? CarSprites.mustang : CarSprites.civic;
+    const wheelFImg = isMustang ? CarSprites.mustangWheelF : CarSprites.civicWheelF;
+    const wheelRImg = isMustang ? CarSprites.mustangWheelR : CarSprites.civicWheelR;
 
     const drawWidth = isMustang ? 165 : 155;
     const drawHeight = (drawWidth * 341) / 1024;
 
-    // Invertir horizontalmente para que miren a la DERECHA
+    // Voltear hacia la DERECHA
     ctx.scale(-1, 1);
 
     const drawX = -drawWidth / 2;
     const drawY = -drawHeight + 14;
 
-    if (isLoaded) {
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
-    } else {
-        ctx.fillStyle = isMustang ? "#e11d48" : "#fcd34d";
-        ctx.fillRect(drawX, drawY + 15, drawWidth, drawHeight - 15);
-    }
+    ctx.imageSmoothingEnabled = false;
 
-    // Centros matemáticos exactos medidos por análisis de píxeles:
-    // Civic: Original Front (X=223, Y=237), Original Rear (X=741.5, Y=233)
-    // Mustang: Original Front (X=210, Y=242), Original Rear (X=750, Y=238)
-    const frontRatioX = isMustang ? (210 / 1024) : (223 / 1024);
-    const rearRatioX  = isMustang ? (750 / 1024) : (741.5 / 1024);
+    // 1. Dibujar el auto original completo
+    ctx.drawImage(carImg, drawX, drawY, drawWidth, drawHeight);
 
-    const frontRatioY = isMustang ? (242 / 341) : (237 / 341);
-    const rearRatioY  = isMustang ? (238 / 341) : (233 / 341);
+    // 2. Coordenadas y tamaños exactos de las ruedas recortadas
+    const scale = drawWidth / 1024;
+    
+    // Civic: Delantera X=224, Y=238. Trasera X=796, Y=240. Radio=68px
+    // Mustang: Delantera X=210, Y=242. Trasera X=750, Y=238. Radio=85px
+    const fX = isMustang ? 210 : 224;
+    const fY = isMustang ? 242 : 238;
+    const rX = isMustang ? 750 : 796;
+    const rY = isMustang ? 238 : 240;
+    const rRadius = isMustang ? 85 : 68;
 
-    const wheelRadius = isMustang ? drawHeight * 0.17 : drawHeight * 0.16;
+    const wheelDiameter = (rRadius * 2) * scale;
+    const rotationAngle = -(car.x / 0.32); // Rotación según avance
 
-    // Dibujar los radios giratorios en la posición exacta
-    drawSpinningWheelRim(ctx, drawX + drawWidth * frontRatioX, drawY + drawHeight * frontRatioY, wheelRadius, car.x, isMustang);
-    drawSpinningWheelRim(ctx, drawX + drawWidth * rearRatioX,  drawY + drawHeight * rearRatioY,  wheelRadius, car.x, isMustang);
+    // Dibujar la propia rueda original recortada rotando sobre su centro exacto
+    drawRotatingRealWheel(ctx, drawX + fX * scale, drawY + fY * scale, wheelDiameter, wheelFImg, rotationAngle);
+    drawRotatingRealWheel(ctx, drawX + rX * scale, drawY + rY * scale, wheelDiameter, wheelRImg, rotationAngle);
 
     // Escape y Llamaradas de backfire en la cola
     const exhaustX = isMustang ? drawWidth * 0.48 : drawWidth * 0.46;
@@ -62,43 +83,11 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
     ctx.restore();
 }
 
-function drawSpinningWheelRim(ctx, cx, cy, radius, distanceMeters, isMustang) {
+function drawRotatingRealWheel(ctx, cx, cy, diameter, wheelImg, angle) {
     ctx.save();
     ctx.translate(cx, cy);
-
-    // Giro hacia adelante sincronizado con la distancia
-    const tireRadiusMeters = 0.32;
-    const rotationAngle = -(distanceMeters / tireRadiusMeters);
-    ctx.rotate(rotationAngle);
-
-    // Fondo del centro del rin para fusionarse de forma limpia
-    ctx.fillStyle = isMustang ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.45)";
-    ctx.beginPath();
-    ctx.arc(0, 0, radius * 0.75, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Radios giratorios
-    const spokes = isMustang ? 5 : 7;
-    const spokeColor = isMustang ? "rgba(203, 213, 225, 0.9)" : "rgba(255, 255, 255, 0.95)";
-    const hubColor = isMustang ? "#1e293b" : "#dc2626"; // Punto rojo Honda Type R
-
-    ctx.strokeStyle = spokeColor;
-    ctx.lineWidth = 1.6;
-
-    for (let i = 0; i < spokes; i++) {
-        const rad = (i * Math.PI * 2) / spokes;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(rad) * (radius * 0.72), Math.sin(rad) * (radius * 0.72));
-        ctx.stroke();
-    }
-
-    // Tuerca central
-    ctx.fillStyle = hubColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, 2, 0, Math.PI * 2);
-    ctx.fill();
-
+    ctx.rotate(angle);
+    ctx.drawImage(wheelImg, -diameter / 2, -diameter / 2, diameter, diameter);
     ctx.restore();
 }
 
