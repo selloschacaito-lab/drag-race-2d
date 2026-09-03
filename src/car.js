@@ -8,17 +8,17 @@ export class Car {
         this.laneY = laneY;
 
         // Estado dinamico
-        this.x = 0; // Metros
-        this.velocity = 0; // m/s
+        this.x = 0;
+        this.velocity = 0;
         this.rpm = this.engine.idleRpm;
-        this.currentGear = 0; // 0 = Neutro, 1 = 1ª, 2 = 2ª, etc.
-        this.clutch = 0; // 0 = acoplado (suelto), 1 = desacoplado (pisado)
-        this.throttle = 0; // 0 a 1
-        this.wheelSpin = 0; // Ratio de patinaje (0 = agarre total, >0 = humo y quemada)
-        this.tireTemp = 40; // Grados Celsius (optimo ~85-105)
+        this.currentGear = 0;
+        this.clutch = 0;
+        this.throttle = 0;
+        this.wheelSpin = 0;
+        this.tireTemp = 40;
         this.backfireTimer = 0;
 
-        // Telemetria de Drag
+        // Telemetria
         this.raceStarted = false;
         this.raceFinished = false;
         this.reactionTime = 0;
@@ -27,7 +27,6 @@ export class Car {
         this.trapSpeedKmh = 0;
         this.totalTimer = 0;
 
-        // Particulas
         this.tireSmoke = [];
         this.exhaustFlames = [];
     }
@@ -157,10 +156,10 @@ export class Car {
 
     emitTireSmoke() {
         if (Math.random() < 0.6) {
-            const wheelOffsetX = this.config.drivetrain === "FWD" ? 38 : -36;
+            const wheelOffsetX = this.config.drivetrain === "FWD" ? 32 : -36;
             this.tireSmoke.push({
                 x: this.x * 20 + wheelOffsetX,
-                y: this.laneY + 14,
+                y: this.laneY + 12,
                 radius: 4 + Math.random() * 8,
                 alpha: 0.8,
                 vx: -15 - Math.random() * 20,
