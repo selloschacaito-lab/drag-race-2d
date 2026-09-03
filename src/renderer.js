@@ -22,7 +22,7 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
     const drawWidth = isMustang ? 165 : 155;
     const drawHeight = (drawWidth * 341) / 1024;
 
-    // Invertir horizontalmente para que miren hacia la DERECHA
+    // Invertir horizontalmente para que miren a la DERECHA
     ctx.scale(-1, 1);
 
     const drawX = -drawWidth / 2;
@@ -36,20 +36,22 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
         ctx.fillRect(drawX, drawY + 15, drawWidth, drawHeight - 15);
     }
 
-    // Efecto de rotación / giro en las ruedas
-    // Las posiciones relativas de las ruedas en la imagen:
-    // Civic: rueda trasera ~21%, delantera ~79%
-    // Mustang: rueda trasera ~18%, delantera ~76%
-    const rearWheelPercent = isMustang ? 0.19 : 0.22;
-    const frontWheelPercent = isMustang ? 0.75 : 0.77;
-    const wheelCenterY = drawY + drawHeight * 0.73;
-    const wheelRadius = isMustang ? drawHeight * 0.24 : drawHeight * 0.23;
+    // Centros matemáticos exactos medidos por análisis de píxeles:
+    // Civic: Original Front (X=223, Y=237), Original Rear (X=741.5, Y=233)
+    // Mustang: Original Front (X=210, Y=242), Original Rear (X=750, Y=238)
+    const frontRatioX = isMustang ? (210 / 1024) : (223 / 1024);
+    const rearRatioX  = isMustang ? (750 / 1024) : (741.5 / 1024);
 
-    drawSpinningWheelRim(ctx, drawX + drawWidth * rearWheelPercent, wheelCenterY, wheelRadius, car.x, isMustang);
-    drawSpinningWheelRim(ctx, drawX + drawWidth * frontWheelPercent, wheelCenterY, wheelRadius, car.x, isMustang);
+    const frontRatioY = isMustang ? (242 / 341) : (237 / 341);
+    const rearRatioY  = isMustang ? (238 / 341) : (233 / 341);
 
-    // Escape y Llamaradas de backfire (en la parte trasera del auto invertido)
-    // Al estar invertido con scale(-1, 1), la parte trasera está en +drawWidth * 0.46
+    const wheelRadius = isMustang ? drawHeight * 0.17 : drawHeight * 0.16;
+
+    // Dibujar los radios giratorios en la posición exacta
+    drawSpinningWheelRim(ctx, drawX + drawWidth * frontRatioX, drawY + drawHeight * frontRatioY, wheelRadius, car.x, isMustang);
+    drawSpinningWheelRim(ctx, drawX + drawWidth * rearRatioX,  drawY + drawHeight * rearRatioY,  wheelRadius, car.x, isMustang);
+
+    // Escape y Llamaradas de backfire en la cola
     const exhaustX = isMustang ? drawWidth * 0.48 : drawWidth * 0.46;
     const exhaustY = 4;
 
@@ -60,36 +62,41 @@ export function drawPixelCar(ctx, car, screenX, screenY) {
     ctx.restore();
 }
 
-// Dibuja los rayos del rin girando según la distancia recorrida
 function drawSpinningWheelRim(ctx, cx, cy, radius, distanceMeters, isMustang) {
     ctx.save();
     ctx.translate(cx, cy);
 
-    // Ángulo de rotación según la distancia recorrida (giro hacia adelante)
+    // Giro hacia adelante sincronizado con la distancia
     const tireRadiusMeters = 0.32;
     const rotationAngle = -(distanceMeters / tireRadiusMeters);
     ctx.rotate(rotationAngle);
 
-    // Dibujar radios giratorios estilizados
-    const spokes = isMustang ? 5 : 7; // 5 radios Mustang, 7 radios Civic Enkei
-    const spokeColor = isMustang ? "rgba(30, 41, 59, 0.75)" : "rgba(255, 255, 255, 0.85)";
-    const hubColor = isMustang ? "#475569" : "#dc2626"; // Centro rojo Honda
+    // Fondo del centro del rin para fusionarse de forma limpia
+    ctx.fillStyle = isMustang ? "rgba(15, 23, 42, 0.6)" : "rgba(255, 255, 255, 0.45)";
+    ctx.beginPath();
+    ctx.arc(0, 0, radius * 0.75, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Radios giratorios
+    const spokes = isMustang ? 5 : 7;
+    const spokeColor = isMustang ? "rgba(203, 213, 225, 0.9)" : "rgba(255, 255, 255, 0.95)";
+    const hubColor = isMustang ? "#1e293b" : "#dc2626"; // Punto rojo Honda Type R
 
     ctx.strokeStyle = spokeColor;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 1.6;
 
     for (let i = 0; i < spokes; i++) {
         const rad = (i * Math.PI * 2) / spokes;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(rad) * (radius * 0.65), Math.sin(rad) * (radius * 0.65));
+        ctx.lineTo(Math.cos(rad) * (radius * 0.72), Math.sin(rad) * (radius * 0.72));
         ctx.stroke();
     }
 
-    // Tuerca / centro de rueda
+    // Tuerca central
     ctx.fillStyle = hubColor;
     ctx.beginPath();
-    ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+    ctx.arc(0, 0, 2, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
@@ -97,7 +104,6 @@ function drawSpinningWheelRim(ctx, cx, cy, radius, distanceMeters, isMustang) {
 
 function drawExhaustFlame(ctx, x, y) {
     const flameLen = 14 + Math.random() * 20;
-    // Al estar invertido el contexto, el fuego sale hacia atrás
     ctx.fillStyle = "#38bdf8";
     ctx.fillRect(x, y - 2, flameLen * 0.3, 4);
 
